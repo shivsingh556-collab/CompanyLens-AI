@@ -1,0 +1,41 @@
+{
+  "name": "CompanyLens AI - Free Public Research Intake",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "companylens-research", "responseMode": "responseNode", "options": {}},
+      "id": "webhook-input",
+      "name": "Research Request",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [0, 0]
+    },
+    {
+      "parameters": {"url": "={{ $json.body.website }}", "options": {"response": {"response": {"responseFormat": "text"}}}},
+      "id": "website-fetch",
+      "name": "Fetch Official Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [240, 0]
+    },
+    {
+      "parameters": {"jsCode": "const request = $('Research Request').first().json.body || {}; const html = String($json.data || $json.body || '').slice(0, 200000); const clean = html.replace(/<script[\\s\\S]*?<\\/script>/gi,' ').replace(/<style[\\s\\S]*?<\\/style>/gi,' ').replace(/<[^>]+>/g,' ').replace(/\\s+/g,' ').trim(); const title=(html.match(/<title[^>]*>([\\s\\S]*?)<\\/title>/i)||[])[1]||request.company||'Unknown company'; const description=(html.match(/<meta[^>]+name=[\"']description[\"'][^>]+content=[\"']([^\"']+)/i)||[])[1]||''; return [{json:{company:request.company,website:request.website,persona:request.persona||'Sales',objective:request.objective||'',evidence:[{signal:'Official website title',value:title.replace(/<[^>]+>/g,'').trim(),status:'evidence',source:request.website},{signal:'Official description',value:description,status:description?'evidence':'missing',source:request.website}],publicTextExcerpt:clean.slice(0,2500),hypotheses:[{signal:'Growth trigger',status:'needs verification',requiredSource:'Official newsroom or filing'},{signal:'Hiring pattern',status:'needs verification',requiredSource:'Official careers page'}],notice:'Free research intake only. Verify every fact before outreach.'}}];"},
+      "id": "evidence-builder",
+      "name": "Build Evidence Ledger",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 0]
+    },
+    {
+      "parameters": {"respondWith": "json", "responseBody": "={{ $json }}", "options": {}},
+      "id": "response",
+      "name": "Return Evidence",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [760, 0]
+    }
+  ],
+  "connections": {"Research Request": {"main": [[{"node": "Fetch Official Website", "type": "main", "index": 0}]]}, "Fetch Official Website": {"main": [[{"node": "Build Evidence Ledger", "type": "main", "index": 0}]]}, "Build Evidence Ledger": {"main": [[{"node": "Return Evidence", "type": "main", "index": 0}]]}},
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "versionId": "companylens-free-v1"
+}
