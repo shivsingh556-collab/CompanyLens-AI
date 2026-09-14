@@ -60,6 +60,13 @@ function renderHistory() {
 }
 async function refreshHistory() { history = browserStorage ? loadBrowserHistory() : (await api('/api/briefs')).briefs; renderHistory(); }
 q('#historySearch').addEventListener('input', renderHistory);
+q('#newBriefBtn').addEventListener('click', () => {
+  if (dirty && !confirm('Discard unsaved changes and start a new company brief?')) return;
+  q('#researchForm').reset(); q('#evidenceForm').reset(); q('#sourceUrl').required = true;
+  evidence = []; currentReport = null; dirty = false; setPersona('Sales'); renderDraft();
+  q('#report').hidden = true; q('#reportState').textContent = 'Start with a company, objective and sources. Your previous saved briefs remain in history.';
+  q('#company').focus();
+});
 q('#historyList').addEventListener('click', event => {
   const button = event.target.closest('[data-id]'); if (!button) return;
   if (dirty && !confirm('Discard unsaved changes and open this saved brief?')) return;
