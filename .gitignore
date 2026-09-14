@@ -1,5 +1,6 @@
-.DS_Store
-*.log
+data/
+__pycache__/
+*.pyc
 .env
 .env.*
 node_modules/

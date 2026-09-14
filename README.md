@@ -1,53 +1,83 @@
 # CompanyLens AI
 
-Evidence-backed company research and role-specific strategy workspace for Sales, BDE, BDM and business leaders.
+A company-research workspace for Sales, BDE, BDM and CEO / Strategy users. Keep public-source claims, review status and discovery hypotheses together before preparing outreach.
 
-## What makes it different
+## Run
 
-Most company-research tools mix facts and AI assumptions. CompanyLens AI keeps an **Evidence Ledger**: every recommendation is marked as verified evidence, a signal that needs verification, or a hypothesis for discovery.
+Requires Python 3.10 or newer. No Python packages, paid API keys or n8n setup are needed.
 
-One research request produces four decision views:
+```bash
+git clone https://github.com/shivsingh556-collab/CompanyLens-AI.git
+cd CompanyLens-AI
+python3 server.py
+```
 
-- **Sales:** conversation hooks and diagnostic questions
-- **BDE:** account mapping and outreach preparation
-- **BDM:** commercial thesis, stakeholder map and deal progression
-- **CEO / Strategy:** patterns, priorities and reversible experiments
+Open http://127.0.0.1:8000. On Windows, `py server.py` can be used. The Python server uses SQLite storage. The Vercel static deployment uses browser storage and needs no server setup.
 
-## Included MVP
+## Vercel deployment
 
-- Responsive, interactive frontend in `dist/index.html`
-- Persona-specific strategy playbooks
-- Confidence score and evidence ledger
-- Copyable executive brief and JSON export
-- Investor demo narration in `docs/investor-demo-script.md`
-- Importable free n8n workflow in `dist/companylens-free-workflow.json`
-- No paid AI key required for the initial evidence-intake workflow
+`vercel.json` publishes `dist` from the repository root with no build step. The hosted app stores briefs in the current browser, with a visible storage label. Research is not shared across users or devices. Clearing site data removes that browser’s saved briefs; export JSON backups. Cloud database, account login and live research are not connected.
 
-## Run locally
+If the existing Vercel project already uses `dist` as its root directory, it can continue serving the same static files. Do not configure `server.py` as a Vercel serverless database.
 
-Open `dist/index.html` in a browser.
+## Working features
 
-## n8n setup
+- Responsive research dashboard with four persona playbooks.
+- Evidence intake: claim, public source URL, publication date and review status.
+- Separate labels for unreviewed sources, researcher-reviewed claims and hypotheses.
+- Review coverage calculated from the proportion of sourced claims marked reviewed. This is **not a truth or confidence score**.
+- Saved briefs, searchable history and reopening: SQLite locally, browser storage on Vercel. Saving an edited brief creates a new snapshot.
+- Executive brief copy, JSON export and print / Save PDF, retaining source and status information.
+- Validation, output escaping, same-origin browser writes and a restricted static-file allowlist.
 
-1. Self-host n8n Community Edition.
-2. Import `dist/companylens-free-workflow.json`.
-3. Activate the workflow and send a POST request to its webhook with:
+## Demo flow
+
+1. Enter a company, website, role and research objective.
+2. Paste a claim and its public source URL; mark it unreviewed.
+3. Add a second entry as a hypothesis without a URL.
+4. Save the brief. Show the evidence ledger and explain the review percentage.
+5. Open the saved brief from history and switch decision view. Save a new snapshot.
+6. Export or print the saved brief with sources intact.
+
+Use actual sourced statements, or clearly identify fictional sample content. A website entered in the company form is a reference, not evidence by itself.
+
+## Current boundaries
+
+This is a **local, single-user MVP**, not a hosted multi-user service. It binds to loopback only and has no accounts or tenant isolation. SQLite lives in `data/companylens.sqlite3`; back up that file to retain research. Do not expose this development server to the internet. A persistent hosted backend and authentication are separate work before public deployment.
+
+Research is entered by the user. The app does not crawl websites, search LinkedIn, independently verify claims or run an AI model. Persona playbooks are explicitly labelled templates. n8n and live research remain deferred. The earlier `dist/companylens-free-workflow.json` is retained as an unconnected experimental artifact; it has not been tested by this update.
+
+Local database history displays the most recent 100 saved briefs; older records remain in SQLite and can be fetched by ID. The local mode reports an error if the backend cannot save. Hosted mode reports browser quota or storage errors without claiming the save succeeded. Exports use the last saved report and warn when the form has unsaved edits.
+
+## API and development
+
+- `GET /api/health`: local backend health.
+- `GET /api/briefs`: latest 100 snapshots.
+- `GET /api/briefs/{id}`: one complete saved report.
+- `POST /api/briefs`: validate, build and persist a new snapshot.
+
+POST body:
 
 ```json
 {
   "company": "Example Company",
   "website": "https://example.com",
   "persona": "BDM",
-  "objective": "Prepare a first discovery conversation"
+  "objective": "Prepare discovery",
+  "evidence": [{
+    "claim": "A working assumption to test in discovery",
+    "url": "",
+    "status": "hypothesis",
+    "observed_at": ""
+  }]
 }
 ```
 
-The free workflow reads the supplied official website, extracts basic evidence and returns a structured research ledger. Future versions can add primary-source news, careers signals and optional AI synthesis.
+Source statuses: `unreviewed`, `reviewed`, `hypothesis`. Non-hypothesis entries require an HTTP(S) URL. Reviewed means the user reviewed the claim; it is never an independent verification guarantee.
 
-## Responsible-use rule
+`COMPANYLENS_DB` overrides the SQLite path; `PORT` overrides port 8000.
 
-Use public sources only. Verify facts before outreach. Do not scrape private profiles, bypass access controls, or treat hypotheses as company truth.
-
-## Status
-
-MVP in active development.
+```bash
+python3 -m unittest -v
+node --check dist/app.js
+```
