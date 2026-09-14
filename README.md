@@ -19,6 +19,7 @@ One research request produces four decision views:
 - Persona-specific strategy playbooks
 - Confidence score and evidence ledger
 - Copyable executive brief and JSON export
+- Investor demo narration in `docs/investor-demo-script.md`
 - Importable free n8n workflow in `dist/companylens-free-workflow.json`
 - No paid AI key required for the initial evidence-intake workflow
 
