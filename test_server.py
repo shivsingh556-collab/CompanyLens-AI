@@ -43,6 +43,15 @@ class WorkspaceTests(unittest.TestCase):
         self.assertEqual(report['review_coverage'], 50)
         self.assertEqual(report['hypothesis_count'], 1)
 
+    def test_staffing_opportunity_and_service_match(self):
+        data = self.payload()
+        data['profile'] = {'industry': 'Technology', 'location': 'Mumbai', 'hiring_activity': 'high', 'openings': 30, 'role_families': 'Engineering', 'pain_points': ['volume-hiring', 'slow-closures']}
+        data['evidence'] = [{'claim': 'The company lists 30 openings.', 'url': 'https://example.com/careers', 'status': 'reviewed'}]
+        report = server.build_report(data)
+        self.assertEqual(report['services'][0]['name'], 'RPO')
+        self.assertGreaterEqual(report['opportunity']['score'], 65)
+        self.assertEqual(len(report['opportunity']['factors']), 5)
+
     def test_persistent_roundtrip(self):
         report = self.post(self.payload())
         with urlopen(self.url + '/api/briefs/' + report['id']) as response:

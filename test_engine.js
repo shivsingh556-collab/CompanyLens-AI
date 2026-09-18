@@ -24,3 +24,19 @@ test('preserve literal source text for safe UI rendering', () => {
   const data = base(); data.company = '<img src=x onerror=alert(1)>';
   assert.equal(buildBrowserReport(data).company, data.company);
 });
+test('high-volume hiring produces an explainable RPO opportunity', () => {
+  const data = base();
+  data.profile = {industry:'Technology', location:'Mumbai', hiring_activity:'high', openings:35, role_families:'Engineering and product', pain_points:['volume-hiring','slow-closures']};
+  data.evidence = [{claim:'The company lists 35 open roles.', url:'https://example.com/careers', status:'reviewed'}];
+  const result = buildBrowserReport(data);
+  assert.equal(result.services[0].name, 'RPO');
+  assert.ok(result.opportunity.score >= 65);
+  assert.equal(result.opportunity.factors.length, 5);
+});
+test('leadership demand recommends executive search without inventing evidence', () => {
+  const data = base();
+  data.profile = {hiring_activity:'active', openings:2, pain_points:['leadership-hiring']};
+  const result = buildBrowserReport(data);
+  assert.equal(result.services[0].name, 'Executive Search');
+  assert.match(result.risks.join(' '), /No public evidence/);
+});
