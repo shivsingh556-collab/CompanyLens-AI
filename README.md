@@ -1,6 +1,6 @@
 # CompanyLens AI
 
-A company-research workspace for Sales, BDE, BDM and CEO / Strategy users. Keep public-source claims, review status and discovery hypotheses together before preparing outreach.
+A staffing-sales intelligence workspace for Sales, BDE, BDM and CEO / Strategy users. CompanyLens qualifies a target account, explains its opportunity score, matches relevant talent services and keeps every public-source claim or discovery hypothesis visible before outreach.
 
 ## Run
 
@@ -22,7 +22,11 @@ If the existing Vercel project already uses `dist` as its root directory, it can
 
 ## Working features
 
-- Responsive research dashboard with four persona playbooks.
+- Responsive TSS-focused account qualification dashboard with four decision views.
+- Explainable 100-point staffing-opportunity score covering hiring activity, potential demand, TSS problem fit, account context and evidence readiness.
+- Hiring profile intake: industry, employee size, locations, opening volume, role families and nine common staffing challenges.
+- Service matching across Permanent Staffing, RPO, Executive Search, Contract Staffing & Payroll, Bulk & Campus Hiring, GCC Talent Acquisition, and HR Consulting & Compliance.
+- Automatically prepared next action, discovery questions, risks / unknowns and editable-ready first outreach draft.
 - Evidence intake: claim, public source URL, publication date and review status.
 - Separate labels for unreviewed sources, researcher-reviewed claims and hypotheses.
 - Review coverage calculated from the proportion of sourced claims marked reviewed. This is **not a truth or confidence score**.
@@ -32,12 +36,12 @@ If the existing Vercel project already uses `dist` as its root directory, it can
 
 ## Demo flow
 
-1. Enter a company, website, role and research objective.
-2. Paste a claim and its public source URL; mark it unreviewed.
-3. Add a second entry as a hypothesis without a URL.
-4. Save the brief. Show the evidence ledger and explain the review percentage.
-5. Open the saved brief from history and switch decision view. Save a new snapshot.
-6. Export or print the saved brief with sources intact.
+1. Enter a target company and its hiring context.
+2. Select the likely recruitment problems and decision view.
+3. Add at least one reviewed public hiring signal and one hypothesis.
+4. Analyse the opportunity and explain the five scoring factors.
+5. Review the recommended TSS service, discovery questions, risks and outreach draft.
+6. Open the saved account from history, export the structured JSON or print the opportunity brief.
 
 Use actual sourced statements, or clearly identify fictional sample content. A website entered in the company form is a reference, not evidence by itself.
 
@@ -45,7 +49,7 @@ Use actual sourced statements, or clearly identify fictional sample content. A w
 
 This is a **local, single-user MVP**, not a hosted multi-user service. It binds to loopback only and has no accounts or tenant isolation. SQLite lives in `data/companylens.sqlite3`; back up that file to retain research. Do not expose this development server to the internet. A persistent hosted backend and authentication are separate work before public deployment.
 
-Research is entered by the user. The app does not crawl websites, search LinkedIn, independently verify claims or run an AI model. Persona playbooks are explicitly labelled templates. n8n and live research remain deferred. The earlier `dist/companylens-free-workflow.json` is retained as an unconnected experimental artifact; it has not been tested by this update.
+Research and account context are entered by the user. The app does not yet crawl websites, search LinkedIn, independently verify claims or run a generative AI model. Scoring and service matching are deterministic and explainable; they are decision support, not proof of client demand. n8n and live research remain deferred. The earlier `dist/companylens-free-workflow.json` is retained as an unconnected experimental artifact.
 
 Local database history displays the most recent 100 saved briefs; older records remain in SQLite and can be fetched by ID. The local mode reports an error if the backend cannot save. Hosted mode reports browser quota or storage errors without claiming the save succeeded. Exports use the last saved report and warn when the form has unsaved edits.
 
@@ -64,6 +68,14 @@ POST body:
   "website": "https://example.com",
   "persona": "BDM",
   "objective": "Prepare discovery",
+  "profile": {
+    "industry": "Technology",
+    "location": "Mumbai",
+    "hiring_activity": "high",
+    "openings": 25,
+    "role_families": "Engineering and product",
+    "pain_points": ["volume-hiring", "slow-closures"]
+  },
   "evidence": [{
     "claim": "A working assumption to test in discovery",
     "url": "",
